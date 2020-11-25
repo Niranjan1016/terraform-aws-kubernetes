@@ -274,23 +274,12 @@ resource "aws_key_pair" "keypair" {
 # AMI image
 #####
 
-data "aws_ami" "centos7" {
+data "aws_ami" "ubuntu" {
+  owners      = ["099720109477"] # AWS account ID of Canonical
   most_recent = true
-  owners      = ["aws-marketplace"]
-
   filter {
-    name   = "product-code"
-    values = ["aw0evgkw8e5c1q413zgy5pjce"]
-  }
-
-  filter {
-    name   = "architecture"
-    values = ["x86_64"]
-  }
-
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-server-*"]
   }
 }
 
@@ -305,7 +294,7 @@ resource "aws_eip" "master" {
 resource "aws_instance" "master" {
   instance_type = var.master_instance_type
 
-  ami = data.aws_ami.centos7.id
+  ami = data.aws_ami.ubuntu.id
 
   key_name = aws_key_pair.keypair.key_name
 
@@ -355,7 +344,7 @@ resource "aws_eip_association" "master_assoc" {
 
 resource "aws_launch_configuration" "nodes" {
   name_prefix          = "${var.cluster_name}-nodes-"
-  image_id             = data.aws_ami.centos7.id
+  image_id             = data.aws_ami.ubuntu.id
   instance_type        = var.worker_instance_type
   key_name             = aws_key_pair.keypair.key_name
   iam_instance_profile = aws_iam_instance_profile.node_profile.name
@@ -425,3 +414,18 @@ resource "aws_route53_record" "master" {
   ttl     = 300
 }
 
+locals {
+  kubeconfig_file = "${abspath(pathexpand(var.kubeconfig_dir))}/${local.cluster_name}.conf"
+}
+
+resource "null_resource" "download_kubeconfig_file" {
+  provisioner "local-exec" {
+    command = <<-EOF
+    alias scp='scp -q -i ${var.private_key_file} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+    scp ubuntu@${aws_eip.master.public_ip}:/home/ubuntu/kubeconfig ${local.kubeconfig_file} >/dev/null
+    EOF
+  }
+  triggers = {
+    wait_for_bootstrap_to_finish = null_resource.wait_for_bootstrap_to_finish.id
+  }
+}
