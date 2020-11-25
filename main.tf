@@ -421,9 +421,6 @@ resource "null_resource" "wait_for_bootstrap_to_finish" {
     while true; do
       sleep 2
       ! ssh ubuntu@${aws_eip.master.public_ip} [[ -f /home/ubuntu/done ]] >/dev/null && continue
-      %{for worker_public_ip in aws_instance.workers[*].public_ip~}
-      ! ssh ubuntu@${worker_public_ip} [[ -f /home/ubuntu/done ]] >/dev/null && continue
-      %{endfor~}
       break
     done
     EOF
