@@ -59,6 +59,11 @@ variable "ssh_public_key" {
   default     = "~/.ssh/id_rsa.pub"
 }
 
+variable "private_key_file" {
+  description = "Path to the pulic part of SSH key which should be used for the instance"
+  default     = "~/.ssh/id_rsa"
+}
+
 variable "hosted_zone" {
   description = "Hosted zone to be used for the alias"
 }
@@ -66,6 +71,11 @@ variable "hosted_zone" {
 variable "hosted_zone_private" {
   description = "Is the hosted zone public or private"
   default     = false
+}
+
+variable "kubeconfig_dir" {
+  description = "Is the hosted zone public or private"
+  default     = "."
 }
 
 variable "ssh_access_cidr" {
@@ -83,4 +93,3 @@ variable "api_access_cidr" {
     "0.0.0.0/0",
   ]
 }
-
