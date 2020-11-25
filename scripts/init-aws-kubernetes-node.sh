@@ -21,19 +21,22 @@ FULL_HOSTNAME="$(curl -s http://169.254.169.254/latest/meta-data/hostname)"
 DNS_NAME=$(echo "$DNS_NAME" | tr 'A-Z' 'a-z')
 
 # Install docker
-yum install -y yum-utils device-mapper-persistent-data lvm2 docker
+apt-get update & apt-get install -y device-mapper-persistent-data lvm2 docker
+
+curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" >/etc/apt/sources.list.d/kubernetes.list
 
 # Install Kubernetes components
-sudo cat <<EOF > /etc/yum.repos.d/kubernetes.repo
-[kubernetes]
-name=Kubernetes
-baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
-enabled=1
-gpgcheck=1
-repo_gpgcheck=1
-gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg
-        https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
-EOF
+# sudo cat <<EOF > /etc/yum.repos.d/kubernetes.repo
+# [kubernetes]
+# name=Kubernetes
+# baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+# enabled=1
+# gpgcheck=1
+# repo_gpgcheck=1
+# gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg
+#         https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+# EOF
 
 # setenforce returns non zero if already SE Linux is already disabled
 is_enforced=$(getenforce)
@@ -42,7 +45,7 @@ if [[ $is_enforced != "Disabled" ]]; then
   sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/selinux/config
 fi
 
-yum install -y kubelet-$KUBERNETES_VERSION kubeadm-$KUBERNETES_VERSION kubernetes-cni
+apt-get install -y kubelet-$KUBERNETES_VERSION kubeadm-$KUBERNETES_VERSION kubernetes-cni
 
 # Start services
 systemctl enable docker
@@ -55,7 +58,7 @@ sysctl net.bridge.bridge-nf-call-iptables=1
 sysctl net.bridge.bridge-nf-call-ip6tables=1
 
 # Fix certificates file on CentOS
-if cat /etc/*release | grep ^NAME= | grep CentOS ; then
+if cat /etc/*release | grep ^NAME= | grep Ubuntu ; then
     rm -rf /etc/ssl/certs/ca-certificates.crt/
     cp /etc/ssl/certs/ca-bundle.crt /etc/ssl/certs/ca-certificates.crt
 fi
