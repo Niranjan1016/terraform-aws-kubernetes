@@ -415,14 +415,14 @@ resource "aws_route53_record" "master" {
 }
 
 locals {
-  kubeconfig_file = "${abspath(pathexpand(var.kubeconfig_dir))}/${local.cluster_name}.conf"
+  kubeconfig_file = "${abspath(pathexpand(var.kubeconfig_dir))}/${var.cluster_name}.conf"
 }
 
 resource "null_resource" "download_kubeconfig_file" {
   provisioner "local-exec" {
     command = <<-EOF
     alias scp='scp -q -i ${var.private_key_file} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
-    scp ubuntu@${aws_eip.master.public_ip}:/home/ubuntu/kubeconfig ${local.kubeconfig_file} >/dev/null
+    scp ubuntu@${aws_eip.master.public_ip}:/home/ubuntu/kubeconfig ${var.cluster_name}${local.kubeconfig_file} >/dev/null
     EOF
   }
   triggers = {
