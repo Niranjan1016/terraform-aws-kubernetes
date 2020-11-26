@@ -20,11 +20,15 @@ FULL_HOSTNAME="$(curl -s http://169.254.169.254/latest/meta-data/hostname)"
 # Make DNS lowercase
 DNS_NAME=$(echo "$DNS_NAME" | tr 'A-Z' 'a-z')
 
-# Install docker
-apt-get update & apt-get install -y docker.io
-
+apt-get update
+apt-get install -y apt-transport-https curl
 curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
 echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" >/etc/apt/sources.list.d/kubernetes.list
+# Install docker
+apt-get update & apt-get install -y docker.io kubelet kubeadm kubernetes-cni
+
+#curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+#echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" >/etc/apt/sources.list.d/kubernetes.list
 
 # Install Kubernetes components
 # sudo cat <<EOF > /etc/yum.repos.d/kubernetes.repo
@@ -45,13 +49,13 @@ echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" >/etc/apt/sources.l
 #   sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/selinux/config
 # fi
 
-apt-get install -y kubelet kubeadm kubernetes-cni
+#apt-get install -y kubelet kubeadm kubernetes-cni
 
 # Start services
-systemctl enable docker
-systemctl start docker
-systemctl enable kubelet
-systemctl start kubelet
+#systemctl enable docker
+#systemctl start docker
+#systemctl enable kubelet
+#systemctl start kubelet
 
 # Set settings needed by Docker
 sysctl net.bridge.bridge-nf-call-iptables=1
