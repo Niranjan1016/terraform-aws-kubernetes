@@ -58,14 +58,14 @@ apt-get update & apt-get install -y docker.io kubelet kubeadm kubernetes-cni
 #systemctl start kubelet
 
 # Set settings needed by Docker
-sysctl net.bridge.bridge-nf-call-iptables=1
-sysctl net.bridge.bridge-nf-call-ip6tables=1
+#sysctl net.bridge.bridge-nf-call-iptables=1
+#sysctl net.bridge.bridge-nf-call-ip6tables=1
 
 # Fix certificates file on CentOS
-if cat /etc/*release | grep ^NAME= | grep Ubuntu ; then
-    rm -rf /etc/ssl/certs/ca-certificates.crt/
-    cp /etc/ssl/certs/ca-bundle.crt /etc/ssl/certs/ca-certificates.crt
-fi
+#if cat /etc/*release | grep ^NAME= | grep Ubuntu ; then
+#    rm -rf /etc/ssl/certs/ca-certificates.crt/
+#    cp /etc/ssl/certs/ca-bundle.crt /etc/ssl/certs/ca-certificates.crt
+#fi
 
 # Initialize the master
 cat >/tmp/kubeadm.yaml <<EOF
