@@ -425,6 +425,9 @@ resource "null_resource" "wait_for_bootstrap_to_finish" {
     done
     EOF
   }
+  triggers = {
+    instance_ids = aws_instance.master.id
+  }
 }
 
 locals {
