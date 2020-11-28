@@ -85,3 +85,4 @@ EOF
 
 kubeadm reset --force
 kubeadm join --config /tmp/kubeadm.yaml
+touch /home/ubuntu/done
