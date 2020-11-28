@@ -26,7 +26,7 @@ apt-get update
 apt-get install -y apt-transport-https curl
 curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
 echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" >/etc/apt/sources.list.d/kubernetes.list
-apt-get update & apt-get install -y docker.io kubelet kubeadm kubernetes-cni
+apt-get update & apt-get install --allow-unauthenticated -y docker.io kubelet kubeadm kubernetes-cni
 
 # Install Kubernetes components
 # sudo cat <<EOF > /etc/yum.repos.d/kubernetes.repo
