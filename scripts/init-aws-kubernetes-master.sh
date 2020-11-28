@@ -7,7 +7,7 @@ set -o errexit
 set -o pipefail
 
 export KUBEADM_TOKEN=${kubeadm_token}
-export DNS_NAME=${dns_name}
+#export DNS_NAME=${dns_name}
 export IP_ADDRESS=${ip_address}
 export CLUSTER_NAME=${cluster_name}
 export ASG_NAME=${asg_name}
@@ -25,7 +25,7 @@ set -o nounset
 FULL_HOSTNAME="$(curl -s http://169.254.169.254/latest/meta-data/hostname)"
 
 # Make DNS lowercase
-DNS_NAME=$(echo "$DNS_NAME" | tr 'A-Z' 'a-z')
+#DNS_NAME=$(echo "$DNS_NAME" | tr 'A-Z' 'a-z')
 
 # Install AWS CLI client
 #ap install -y python2-pip
@@ -112,7 +112,7 @@ apiVersion: kubeadm.k8s.io/v1beta2
 kind: ClusterConfiguration
 apiServer:
   certSANs:
-  - $DNS_NAME
+  #- $DNS_NAME
   - $IP_ADDRESS
   extraArgs:
     cloud-provider: aws
@@ -160,7 +160,7 @@ chown ubuntu:ubuntu $KUBECONFIG_OUTPUT
 chmod 0600 $KUBECONFIG_OUTPUT
 
 cp /home/ubuntu/kubeconfig_ip /home/ubuntu/kubeconfig
-sed -i "s/server: https:\/\/$IP_ADDRESS:6443/server: https:\/\/$DNS_NAME:6443/g" /home/ubuntu/kubeconfig
+#sed -i "s/server: https:\/\/$IP_ADDRESS:6443/server: https:\/\/$DNS_NAME:6443/g" /home/ubuntu/kubeconfig
 chown ubuntu:ubuntu /home/ubuntu/kubeconfig
 chmod 0600 /home/ubuntu/kubeconfig
 
