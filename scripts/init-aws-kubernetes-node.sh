@@ -20,15 +20,13 @@ FULL_HOSTNAME="$(curl -s http://169.254.169.254/latest/meta-data/hostname)"
 # Make DNS lowercase
 DNS_NAME=$(echo "$DNS_NAME" | tr 'A-Z' 'a-z')
 
+# Install docker
+
 apt-get update
 apt-get install -y apt-transport-https curl
 curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
 echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" >/etc/apt/sources.list.d/kubernetes.list
-# Install docker
 apt-get update & apt-get install -y docker.io kubelet kubeadm kubernetes-cni
-
-#curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
-#echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" >/etc/apt/sources.list.d/kubernetes.list
 
 # Install Kubernetes components
 # sudo cat <<EOF > /etc/yum.repos.d/kubernetes.repo
@@ -48,24 +46,21 @@ apt-get update & apt-get install -y docker.io kubelet kubeadm kubernetes-cni
 #   setenforce 0
 #   sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/selinux/config
 # fi
-
-#apt-get install -y kubelet kubeadm kubernetes-cni
-
 # Start services
-#systemctl enable docker
-#systemctl start docker
-#systemctl enable kubelet
-#systemctl start kubelet
+# systemctl enable docker
+# systemctl start docker
+# systemctl enable kubelet
+# systemctl start kubelet
 
-# Set settings needed by Docker
-#sysctl net.bridge.bridge-nf-call-iptables=1
-#sysctl net.bridge.bridge-nf-call-ip6tables=1
+# # Set settings needed by Docker
+# sysctl net.bridge.bridge-nf-call-iptables=1
+# sysctl net.bridge.bridge-nf-call-ip6tables=1
 
-# Fix certificates file on CentOS
-#if cat /etc/*release | grep ^NAME= | grep Ubuntu ; then
-#    rm -rf /etc/ssl/certs/ca-certificates.crt/
-#    cp /etc/ssl/certs/ca-bundle.crt /etc/ssl/certs/ca-certificates.crt
-#fi
+# # Fix certificates file on CentOS
+# if cat /etc/*release | grep ^NAME= | grep Ubuntu ; then
+#     rm -rf /etc/ssl/certs/ca-certificates.crt/
+#     cp /etc/ssl/certs/ca-bundle.crt /etc/ssl/certs/ca-certificates.crt
+# fi
 
 # Initialize the master
 cat >/tmp/kubeadm.yaml <<EOF
