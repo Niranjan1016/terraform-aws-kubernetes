@@ -8,7 +8,7 @@ set -o pipefail
 
 export KUBEADM_TOKEN=${kubeadm_token}
 export MASTER_IP=${master_private_ip}
-export DNS_NAME=${dns_name}
+#export DNS_NAME=${dns_name}
 export KUBERNETES_VERSION="1.19.4"
 
 # Set this only after setting the defaults
@@ -18,7 +18,7 @@ set -o nounset
 FULL_HOSTNAME="$(curl -s http://169.254.169.254/latest/meta-data/hostname)"
 
 # Make DNS lowercase
-DNS_NAME=$(echo "$DNS_NAME" | tr 'A-Z' 'a-z')
+#DNS_NAME=$(echo "$DNS_NAME" | tr 'A-Z' 'a-z')
 
 # Install docker
 
