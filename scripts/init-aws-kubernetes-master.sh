@@ -112,7 +112,6 @@ apiVersion: kubeadm.k8s.io/v1beta2
 kind: ClusterConfiguration
 apiServer:
   certSANs:
-  #- $DNS_NAME
   - $IP_ADDRESS
   extraArgs:
     cloud-provider: aws
