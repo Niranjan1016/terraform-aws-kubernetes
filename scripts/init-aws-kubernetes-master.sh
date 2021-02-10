@@ -1,4 +1,4 @@
-#!/bin/bash
+!/bin/bash
 
 exec &> /var/log/init-aws-kubernetes-master.log
 
@@ -16,7 +16,7 @@ export ASG_MAX_NODES="${asg_max_nodes}"
 export AWS_REGION=${aws_region}
 export AWS_SUBNETS="${aws_subnets}"
 export ADDONS="${addons}"
-export KUBERNETES_VERSION="1.19.4"
+export KUBERNETES_VERSION="1.20.0"
 
 # Set this only after setting the defaults
 set -o nounset
@@ -64,7 +64,7 @@ apt-get update & apt-get install -y docker.io kubelet kubeadm kubernetes-cni
 # if [[ $is_enforced != "Disabled" ]]; then
 #   setenforce 0
 #   sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/selinux/config
-  
+
 # fi
 
 #apt-get install -y kubelet kubeadm kubernetes-cni
@@ -129,7 +129,7 @@ etcd:
 imageRepository: k8s.gcr.io
 kubernetesVersion: v$KUBERNETES_VERSION
 networking:
-  podNetworkCidr: 192.168.0.0/16
+# podNetworkCidr: 192.168.0.0/16
   dnsDomain: cluster.local
   podSubnet: ""
   serviceSubnet: 10.96.0.0/12
@@ -151,10 +151,7 @@ kubectl create clusterrolebinding admin-cluster-binding --clusterrole=cluster-ad
 
 # Prepare the kubectl config file for download to cient (IP address)
 export KUBECONFIG_OUTPUT=/home/ubuntu/kubeconfig_ip
-kubeadm alpha kubeconfig user \
-  --client-name admin \
-  --apiserver-advertise-address $IP_ADDRESS \
-  > $KUBECONFIG_OUTPUT
+kubeadm alpha kubeconfig user --client-name admin --config /tmp/kubeadm.yaml > $KUBECONFIG_OUTPUT
 chown ubuntu:ubuntu $KUBECONFIG_OUTPUT
 chmod 0600 $KUBECONFIG_OUTPUT
 
@@ -170,4 +167,4 @@ do
   kubectl apply -f /tmp/addon.yaml
   rm /tmp/addon.yaml
 done
-touch /home/ubuntu/done
+touch /home/ubuntu/completed
