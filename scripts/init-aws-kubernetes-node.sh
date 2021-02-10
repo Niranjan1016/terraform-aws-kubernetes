@@ -1,4 +1,4 @@
-#!/bin/bash
+# baseurl=https://#!/bin/bash
 
 exec &> /var/log/init-aws-kubernetes-node.log
 
