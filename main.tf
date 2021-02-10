@@ -39,7 +39,7 @@ resource "aws_iam_role" "master_role" {
 
   assume_role_policy = <<EOF
 {
-  "Version": "2012-10-17",
+      "Version": "2012-10-17",
   "Statement": [
     {
       "Action": "sts:AssumeRole",
@@ -78,7 +78,7 @@ resource "aws_iam_policy" "node_policy" {
   name = "${var.cluster_name}-node"
   path = "/"
   description = "Policy for role ${var.cluster_name}-node"
-  policy = data.template_file.node_policy_json.rendered
+   policy = data.template_file.node_policy_json.rendered
 }
 
 resource "aws_iam_role" "node_role" {
@@ -118,8 +118,8 @@ resource "aws_iam_instance_profile" "node_profile" {
 #####
 
 # Find VPC details based on Master subnet
-data "aws_subnet" "cluster_subnet" {
-  id = var.master_subnet_id
+data "aws_subnet" "cluster_subnet"{
+ id = var.master_subnet_id
 }
 
 resource "aws_security_group" "kubernetes" {
@@ -159,7 +159,7 @@ resource "aws_security_group_rule" "allow_ssh_from_cidr" {
   #
   # If the expression in the following list itself returns a list, remove the
   # brackets to avoid interpretation as a list of lists. If the expression
-  # returns a single list item then leave it as-is and remove this TODO comment.
+    # returns a single list item then leave it as-is and remove this TODO comment.
   cidr_blocks       = [var.ssh_access_cidr[count.index]]
   security_group_id = aws_security_group.kubernetes.id
 }
@@ -199,8 +199,7 @@ resource "aws_security_group_rule" "allow_api_from_cidr" {
 
 data "template_file" "init_master" {
   template = file("${path.module}/scripts/init-aws-kubernetes-master.sh")
-
-  vars = {
+   vars = {
     kubeadm_token = module.kubeadm-token.token
     dns_name      = "${var.cluster_name}.${var.hosted_zone}"
     ip_address    = aws_eip.master.public_ip
@@ -240,7 +239,7 @@ data "template_cloudinit_config" "master_cloud_init" {
   part {
     filename     = "cloud-init-config.yaml"
     content_type = "text/cloud-config"
-    content      = data.template_file.cloud_init_config.rendered
+        content      = data.template_file.cloud_init_config.rendered
   }
 
   part {
@@ -317,7 +316,6 @@ resource "aws_instance" "master" {
     },
     var.tags,
   )
-
   root_block_device {
     volume_type           = "gp2"
     volume_size           = "50"
@@ -413,14 +411,14 @@ resource "aws_route53_record" "master" {
   records = [aws_eip.master.public_ip]
   ttl     = 300
 }
-  
+
 resource "null_resource" "wait_for_bootstrap_to_finish" {
   provisioner "local-exec" {
     command = <<-EOF
     alias ssh='ssh -q -i ${var.private_key_file} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
     while true; do
       sleep 2
-      ! ssh ubuntu@${aws_eip.master.public_ip} [[ -f /home/ubuntu/done ]] >/dev/null && continue
+      ! ssh ubuntu@${aws_eip.master.public_ip} [[ -f /home/ubuntu/completed ]] >/dev/null && continue
       break
     done
     EOF
