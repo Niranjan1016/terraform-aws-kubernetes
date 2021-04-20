@@ -1,0 +1,146 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: prometheus
+rules:
+- apiGroups:
+  - ""
+  resources:
+    - configmaps
+  verbs:
+    - "get"
+- apiGroups: [""]
+  resources:
+  - nodes
+  - services
+  - endpoints
+  - pods
+  verbs:
+    - "get"
+    - "list"
+    - "watch"
+- nonResourceURLs:
+  - "/metrics"
+  verbs:
+    - "get"
+
+---
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: prometheus
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: prometheus
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: prometheus
+subjects:
+- kind: ServiceAccount
+  name: prometheus
+  namespace: default
+
+---
+global:
+  scrape_interval: 15s
+  external_lables:
+    monitor: 'codelab-monitor'
+  scrape_configs:
+  - job_name: 'prometheus'
+    scrape_interval: 5s
+    static_configs:
+    - targets: ['localhost: 9090']
+  - job_name: 'kubernetes-service-endpoints'
+    kubernetes_sd_configs:
+    - role: endpoints
+    relabel_configs:
+    - action: labelmap
+      regex: _meta_kubernetes_service_label_(.+)
+    - source_labels: [_meta_kubernetes_namespace]
+      action: replace
+      target: kubernetes_namespace
+    - source_labels: [_meta_kubernetes_service_name]
+      action: replace
+      target_label: kubernetes_name
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+data:
+  config.yml: |
+    global:
+      scrape_interval: 15s
+      external_lables:
+        monitor: 'codelab-monitor'
+      scrape_configs:
+      - job_name: 'prometheus'
+        scrape_interval: 5s
+        static_configs:
+        - targets: ['localhost: 9090']
+      - job_name: 'kubernetes-service-endpoints'
+        kubernetes_sd_configs:
+        - role: endpoints
+        relabel_configs:
+        - action: labelmap
+          regex: _meta_kubernetes_service_label_(.+)
+        - source_labels: [_meta_kubernetes_namespace]
+          action: replace
+          target: kubernetes_namespace
+        - source_labels: [_meta_kubernetes_service_name]
+          action: replace
+          target_label: kubernetes_name
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+    spec:
+      containers:
+      - name: prometheus-cont
+        image: prom/prometheus
+        volumeMounts:
+          - name: config-volume
+            mountPath: /etc/prometheus.yml
+            subPath: prometheus.yml
+        ports:
+        - containerPort: 9090
+      volumes:
+        - name: config-volume
+          configMap:
+            name: prometheus-config
+      serviceAccountName: prometheus
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-service
+spec:
+  selector:
+    app: prometheus
+  ports:
+  - port: 9090
+    targetPort: 9090
+    name: promi
+    protocol: TCP
+  type: NodePort
